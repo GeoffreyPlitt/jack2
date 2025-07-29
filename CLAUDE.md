@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build System and Development Commands
 
-JACK2 uses the WAF build system (Python-based):
+JACK2 uses the WAF build system (Python-based). WAF is a build automation tool written in Python, similar to Make but more portable. All build rules are defined in the `wscript` file at the repository root.
+
+### WAF Commands
 
 ```bash
 # Configure the build (one-time setup)
@@ -24,7 +26,25 @@ python3 ./waf build --tests
 ./build/tests/testAtomic
 ./build/tests/testMutex
 # Other test binaries in build/tests/
+
+# Other available commands
+python3 ./waf distclean  # Remove build folders and data
+python3 ./waf uninstall  # Remove installed targets
+python3 ./waf --help     # Show all commands and options
 ```
+
+### Build System Structure
+
+The WAF build system for JACK2 consists of:
+- `waf` - The WAF executable (Python script)
+- `wscript` - Main build configuration file (like a Makefile)
+- `waflib/` - WAF library directory
+- Key functions in wscript:
+  - `options()` - Define command-line options
+  - `configure()` - Configuration checks and setup
+  - `build()` - Main build rules
+  - `build_jackd()` - Build the JACK daemon
+  - `build_drivers()` - Build audio drivers
 
 ### Build Configuration Options
 
@@ -35,8 +55,18 @@ Key configure options include:
 - `--tests` - Build test suite
 - `--mixed` - 32/64-bit mixed mode
 - `--profile` - Engine profiling support
+- `-j JOBS` - Parallel build jobs (e.g., `-j4`)
 
 Example: `python3 ./waf configure --debug --alsa --tests`
+
+### Build Dependencies (macOS)
+
+Before building on macOS, install these dependencies:
+```bash
+brew install python3 pkg-config libsamplerate opus
+```
+
+Note: CELT is optional/deprecated. Ensure Xcode command line tools are installed: `xcode-select --install`
 
 ## Architecture Overview
 
