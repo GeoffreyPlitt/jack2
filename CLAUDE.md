@@ -33,6 +33,28 @@ python3 ./waf uninstall  # Remove installed targets
 python3 ./waf --help     # Show all commands and options
 ```
 
+### Complete macOS Build Process
+
+```bash
+# 1. Install dependencies
+brew install python3 pkg-config libsamplerate opus aften berkeley-db@5
+
+# 2. Clean any previous build attempts
+python3 ./waf distclean
+
+# 3. Configure with environment variables (Apple Silicon)
+LDFLAGS="-L/opt/homebrew/lib" CPPFLAGS="-I/opt/homebrew/include" python3 ./waf configure
+
+# 4. Build JACK2
+python3 ./waf build
+
+# 5. Install (optional, requires sudo)
+sudo python3 ./waf install
+
+# 6. Test the build (without installing)
+./build/jackd -d coreaudio
+```
+
 ### Build System Structure
 
 The WAF build system for JACK2 consists of:
@@ -63,10 +85,36 @@ Example: `python3 ./waf configure --debug --alsa --tests`
 
 Before building on macOS, install these dependencies:
 ```bash
-brew install python3 pkg-config libsamplerate opus
+brew install python3 pkg-config libsamplerate opus aften berkeley-db@5
 ```
 
-Note: CELT is optional/deprecated. Ensure Xcode command line tools are installed: `xcode-select --install`
+Note: 
+- CELT is optional/deprecated
+- `aften` is required on macOS for AC3 encoding support in CoreAudio driver
+- `berkeley-db@5` is used for metadata support (kept at v5 to avoid AGPL-3.0 restrictions)
+- Ensure Xcode command line tools are installed: `xcode-select --install`
+
+### macOS Build Issues and Solutions
+
+If the WAF configure step fails to find libraries (especially `aften`), you need to set environment variables to help the compiler find Homebrew libraries:
+
+```bash
+# For Apple Silicon Macs (M1/M2/M3)
+export LDFLAGS="-L/opt/homebrew/lib"
+export CPPFLAGS="-I/opt/homebrew/include"
+
+# For Intel Macs
+export LDFLAGS="-L/usr/local/lib"
+export CPPFLAGS="-I/usr/local/include"
+
+# Then configure
+python3 ./waf configure
+```
+
+Alternatively, you can pass these directly to the configure command:
+```bash
+LDFLAGS="-L/opt/homebrew/lib" CPPFLAGS="-I/opt/homebrew/include" python3 ./waf configure
+```
 
 ## Architecture Overview
 
