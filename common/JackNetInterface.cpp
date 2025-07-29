@@ -715,7 +715,12 @@ namespace Jack
 
         // disable local loop
         if (fSocket.SetLocalLoop() == SOCKET_ERROR) {
-            jack_error("Can't disable multicast loop : %s", StrError(NET_ERROR_CODE));
+            const char* direct_master = getenv("JACK_NETJACK_MASTER_IP");
+            if (direct_master && strcmp(fMulticastIP, direct_master) == 0) {
+                jack_warning("Multicast mode failed (SetLocalLoop) : %s", StrError(NET_ERROR_CODE));
+            } else {
+                jack_error("Can't disable multicast loop : %s", StrError(NET_ERROR_CODE));
+            }
         }
 
         // send 'AVAILABLE' until 'SLAVE_SETUP' received
