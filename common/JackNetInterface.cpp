@@ -717,7 +717,7 @@ namespace Jack
         if (fSocket.SetLocalLoop() == SOCKET_ERROR) {
             const char* direct_master = getenv("JACK_NETJACK_MASTER_IP");
             if (direct_master && strcmp(fMulticastIP, direct_master) == 0) {
-                jack_warning("Multicast mode failed (SetLocalLoop) : %s", StrError(NET_ERROR_CODE));
+                jack_info("WARNING: Multicast mode failed (SetLocalLoop) : %s", StrError(NET_ERROR_CODE));
             } else {
                 jack_error("Can't disable multicast loop : %s", StrError(NET_ERROR_CODE));
             }

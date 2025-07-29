@@ -116,6 +116,28 @@ Alternatively, you can pass these directly to the configure command:
 LDFLAGS="-L/opt/homebrew/lib" CPPFLAGS="-I/opt/homebrew/include" python3 ./waf configure
 ```
 
+### Known Build Issues and Fixes
+
+1. **Missing `jack_warning` function error:**
+   - **Error:** `use of undeclared identifier 'jack_warning'` in `JackNetInterface.cpp:720`
+   - **Fix:** Change `jack_warning` to `jack_info` with "WARNING: " prefix in the message
+   - **Root cause:** `jack_warning` is not defined in `JackError.h`, only `jack_error`, `jack_info`, and `jack_log` exist
+
+2. **Testing the built binary:**
+   ```bash
+   # The built jackd binary needs library paths to run from build directory
+   DYLD_LIBRARY_PATH=build/common ./build/jackd --help
+   
+   # Test with dummy driver (shows driver options)
+   DYLD_LIBRARY_PATH=build/common JACK_DRIVER_DIR=build ./build/jackd -d dummy --help
+   ```
+
+3. **Build artifacts location:**
+   - Main server binary: `build/jackd`
+   - Dynamic libraries: `build/common/lib*.dylib`
+   - Audio drivers: `build/jack_*.so` (CoreAudio, CoreMIDI, dummy, loopback, net, etc.)
+   - Build configuration: `build/config.h`
+
 ## Architecture Overview
 
 JACK2 is a low-latency audio server with a sophisticated real-time architecture:
